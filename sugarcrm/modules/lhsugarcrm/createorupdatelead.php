@@ -5,6 +5,8 @@ $chat = erLhcoreClassChat::getSession()->load( 'erLhcoreClassModelChat', $Params
 
 if ( erLhcoreClassChat::hasAccessToRead($chat) )
 {
+    erLhcoreClassChatEventDispatcher::getInstance()->dispatch('sugarcrm.createorupdatelead', array());
+    
     try {
         $sugarcrm = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionSugarcrm');
         $leadId = $sugarcrm->createLeadByChat($chat);
