@@ -1,0 +1,1 @@
+<li><a href="<?php echo erLhcoreClassDesign::baseurl('sugarcrm/index')?>">SugarCRM</a></li>

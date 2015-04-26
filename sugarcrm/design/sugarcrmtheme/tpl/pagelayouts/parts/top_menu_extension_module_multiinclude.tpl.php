@@ -1,0 +1,1 @@
+<?php $hasExtensionModule = $currentUser->hasAccessTo('lhsugarcrm','configure') || (isset($hasExtensionModule) ? $hasExtensionModule : false);?>
