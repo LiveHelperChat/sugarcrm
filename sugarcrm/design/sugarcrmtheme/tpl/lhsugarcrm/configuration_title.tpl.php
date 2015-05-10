@@ -1,0 +1,1 @@
+<h1><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module', 'SugarCRM integration configuration'); ?></h1>

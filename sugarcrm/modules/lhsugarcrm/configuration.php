@@ -42,5 +42,9 @@ $Result['path'] = array(
         'url' => erLhcoreClassDesign::baseurl('sugarcrm/configuration'),
         'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module', 'Configuration')
     )
-)?>
+);
+
+erLhcoreClassChatEventDispatcher::getInstance()->dispatch('sugarcrm.configuration_path',array('result' => & $Result));
+    
+?>
 

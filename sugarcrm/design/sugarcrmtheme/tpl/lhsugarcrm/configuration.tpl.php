@@ -1,4 +1,4 @@
-<h1><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module', 'SugarCRM integration configuration'); ?></h1>
+<?php include(erLhcoreClassDesign::designtpl('lhsugarcrm/configuration_title.tpl.php'));?>
 
 <form action="" method="post" autocomplete="off">
 
