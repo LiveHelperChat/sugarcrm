@@ -1,0 +1,1 @@
+<li role="presentation"><a href="#main-extension-sugarcrm-chat-<?php echo $chat->id?>" aria-controls="main-extension-sugarcrm-chat-<?php echo $chat->id?>" role="tab" data-toggle="tab" title="SugarCRM">SugarCRM</a></li>
