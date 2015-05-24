@@ -183,6 +183,51 @@ class erLhcoreClassExtensionSugarcrm
     }
 
     /**
+     * Creates a general Lead by provided arguments
+     * */
+    public function createLeadByArray($params, $leadId = false) {
+        if ($this->settings['sugarcrm_enabled'] == true) {
+            $soapclient = new SoapClient($this->settings['wsdl_address']);
+    
+            $result_array = $soapclient->login(array(
+                'user_name' => $this->settings['wsdl_username'],
+                'password' => $this->settings['wsdl_password'],
+                'version' => '0.1'
+            ), 'soaplhcsugarcrm');
+            $session_id = $result_array->id;
+            $user_guid = $soapclient->get_user_id($session_id);
+    
+            $leadData = array(
+                array(
+                    'name' => 'status',
+                    'value' => 'New'
+                ),
+                array(
+                    'name' => 'assigned_user_id',
+                    'value' => $user_guid
+                )
+            );
+    
+            if ($leadId !== false) {
+                $leadData[] = array(
+                    'name' => 'id',
+                    'value' => $leadId
+                );
+            }
+    
+            foreach ($params as $additionalField) {
+                $leadData[] = $additionalField;
+            }
+    
+            $result = $soapclient->set_entry($session_id, 'Leads', $leadData);
+    
+            return $result;
+        } else {
+            throw new Exception('SugarCRM extension is not enabled');
+        }
+    }
+    
+    /**
      * Creates a lead from chat object
      *
      * @param unknown $chat            
