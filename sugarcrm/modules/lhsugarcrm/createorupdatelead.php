@@ -15,11 +15,11 @@ if ( erLhcoreClassChat::hasAccessToRead($chat) )
         $tpl->set('lead',$leadId);
         $tpl->set('chat',$chat);
         
-        echo json_encode(array('result' => $tpl->fetch()));
+        echo json_encode(array('error' => false, 'lead_id' => $leadId->id, 'result' => $tpl->fetch()));
     } catch (Exception $e) {
         $tpl = erLhcoreClassTemplate::getInstance('lhkernel/validation_error.tpl.php');
         $tpl->set('errors',array($e->getMessage()));
-        echo json_encode(array('result' => $tpl->fetch()));
+        echo json_encode(array('error' => true, 'result' => $tpl->fetch()));
     }
 }
 
