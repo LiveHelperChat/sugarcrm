@@ -116,6 +116,150 @@ class erLhcoreClassExtensionSugarcrm
         }
     }
     
+    /***
+     * Fetches single entry data
+     * 
+     * @param string $leadId
+     */
+    public function getLeadById($leadId) {
+        
+        $soapclient = new SoapClient($this->settings['wsdl_address']);
+        
+        $result_array = $soapclient->login(array(
+            'user_name' => $this->settings['wsdl_username'],
+            'password' => $this->settings['wsdl_password'],
+            'version' => '0.1'
+        ), 'soaplhcsugarcrm');
+        
+        $session_id = $result_array->id;
+                
+        $result = $soapclient->get_entry( $session_id, "Leads", $leadId);        
+       
+        if (isset($result->entry_list[0])) {
+            return $result->entry_list[0];
+        }
+       
+        return false;
+    }
+    
+    public function getFieldsForUpdate()
+    {
+        return array(
+            'phone_work' => array(
+                'title' =>  erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module', 'Phone work')
+            ),
+            'phone_home' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','Phone home')
+            ),
+            'phone_mobile' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','Phone mobile')
+            ),
+            'date_entered' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','Entered'),
+                'disabled' => true
+            ),
+            'date_modified' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','Modified'),
+                'disabled' => true
+            ),
+            'description' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','Description'),
+                'type' => 'textarea'
+            ),
+            'first_name' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','First name')
+            ),
+            'last_name' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','Last name')
+            ),
+            'title' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','Title')
+            ),
+            'email1' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','E-mail')
+            ),
+            'website' => array(
+                'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','Website')
+            ),
+            'lead_source_description' => array(
+                'title' => 'Lead source description','type' => 'textarea'
+            )
+        );
+    }
+    
+    public function doUpdateLeadId($leadId) {
+        
+        $soapclient = new SoapClient($this->settings['wsdl_address']);
+        
+        $result_array = $soapclient->login(array(
+            'user_name' => $this->settings['wsdl_username'],
+            'password' => $this->settings['wsdl_password'],
+            'version' => '0.1'
+        ), 'soaplhcsugarcrm');
+        
+        $session_id = $result_array->id;
+                        
+        $leadData = array();     
+        $leadData[] = array(
+            'name' => 'id',
+            'value' => $leadId
+        );
+        
+        $leadFields = $this->getFieldsForUpdate();
+        
+        foreach ($leadFields as $key => $field) {
+            if (!isset($field['disabled']) || $field['disabled'] == false){
+                $leadData[] = array(
+                    'name' => $key,
+                    'value' => isset($_POST[$key]) ? $_POST[$key] : ''
+                );
+            }
+        }
+        
+        $result = $soapclient->set_entry($session_id, 'Leads', $leadData);
+        
+        if ($result->id != -1) {
+            return $this->getLeadById($result->id);
+        }
+        
+        return false;
+    }
+    
+    /***
+     * $sugarcrm = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionSugarcrm');    
+     * $sugarcrm->searchByModule(array('leads.phone_work' => '<some phone>'));
+     * */
+    public function searchByModule($searchParams = array(), $module = 'Leads')
+    {
+
+        $soapclient = new SoapClient($this->settings['wsdl_address']);
+        
+        $result_array = $soapclient->login(array(
+            'user_name' => $this->settings['wsdl_username'],
+            'password' => $this->settings['wsdl_password'],
+            'version' => '0.1'
+        ), 'soaplhcsugarcrm');
+        
+        $session_id = $result_array->id;
+        
+        $db = ezcDbInstance::get();
+                      
+        // format filter
+        $filterSQLParams = array();
+        foreach ($searchParams as $field => $param) {
+            $filterSQLParams[] = $field.' = '.$db->quote($param);
+        }
+        
+        $results = $soapclient->get_entry_list( $session_id, $module, '('.implode(" OR ", $filterSQLParams).')', "", 0, array(), 1 );
+            
+        if ($results->result_count == 1)
+        {
+            return $results->entry_list[0];
+        }
+        
+        return false;        
+    }
+    
     /**
      * Creates a demo lead from SugarCRM extension configuration window
      *
@@ -237,6 +381,23 @@ class erLhcoreClassExtensionSugarcrm
     public function createLeadByChat(& $chat)
     {
         if ($this->settings['sugarcrm_enabled'] == true) {
+            
+            // Search for existing leads only if lead does not exists and phone is not empty
+            if ((!isset($chat->chat_variables_array['sugarcrm_lead_id']) || $chat->chat_variables_array['sugarcrm_lead_id'] == '') && $chat->phone != '') {
+                $leadExisting = $this->searchByModule(array('leads.phone_work' => $chat->phone));
+                if ($leadExisting !== false) {
+                    
+                    // Store associated lead data
+                    $chat->chat_variables_array['sugarcrm_lead_id'] = $leadExisting->id;
+                    $chat->chat_variables = json_encode($chat->chat_variables_array);
+                    $chat->saveThis();
+                    
+                    // Return founded lead
+                    return $leadExisting;
+                }
+            }            
+
+            // Proceed normal workflow if lead not found
             $soapclient = new SoapClient($this->settings['wsdl_address']);
             
             $result_array = $soapclient->login(array(
@@ -327,7 +488,12 @@ class erLhcoreClassExtensionSugarcrm
                 $chat->saveThis();
             }
             
+            if ($result->id == -1) {
+                throw new Exception('Lead could not be created');
+            }
+            
             return $result;
+            
         } else {
             throw new Exception('SugarCRM extension is not enabled');
         }

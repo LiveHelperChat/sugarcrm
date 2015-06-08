@@ -17,6 +17,18 @@ $ViewList['createorupdatelead'] = array(
     'functions' => array('use')
 );
 
+$ViewList['getleadfields'] = array(
+    'params' => array('lead_id'),
+    'uparams' => array(),
+    'functions' => array('use')
+);
+
+$ViewList['updateleadfields'] = array(
+    'params' => array('lead_id'),
+    'uparams' => array(),
+    'functions' => array('use')
+);
+
 $ViewList['configuration'] = array(
     'params' => array(),
     'uparams' => array(),
