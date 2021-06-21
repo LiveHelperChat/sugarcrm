@@ -20,7 +20,7 @@ if ($lead !== false) : ?>
 </div>
 <?php endif;?>
 
-<form action="" method="post" onsubmit="return sugarcrm.updateLeadFields('<?php echo $lead->id?>',$(this))">
+<form action="" method="post" onsubmit="return sugarcrm.updateLeadFields('<?php echo $lead->id?>',$(this))" ng-non-bindable>
     <div class="row">
         <?php foreach ($fieldsDisplay as $fieldName => $nameValue) : ?>
             <div class="col-xs-<?php if (isset($nameValue['type']) && $nameValue['type'] == 'textarea') : ?>12<?php else : ?>4<?php endif;?>">

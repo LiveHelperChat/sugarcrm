@@ -4,7 +4,7 @@
 
     <?php $sugarCRMSettings = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionSugarcrm')->settings; ?>
     <?php if (isset($sugarCRMSettings['sugarcrm_enabled']) && $sugarCRMSettings['sugarcrm_enabled']  == true) : ?>
-    <div role="tabpanel" class="tab-pane" id="main-extension-sugarcrm-chat-<?php echo $chat->id?>">
+    <div role="tabpanel" class="tab-pane" id="main-extension-sugarcrm-chat-<?php echo $chat->id?>" ng-non-bindable>
     
         <?php if (!isset($chat->chat_variables_array['sugarcrm_lead_id']) || $chat->chat_variables_array['sugarcrm_lead_id'] == '') : ?>
     	<div class="form-group">

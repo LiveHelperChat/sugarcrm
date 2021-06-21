@@ -21,7 +21,7 @@
     <pre><?php print_r($lead_id);?></pre>
 <?php endif;?>
 
-<div role="tabpanel">
+<div role="tabpanel" ng-non-bindable>
 		<!-- Nav tabs -->
 		<ul class="nav nav-tabs" role="tablist">
 			<li role="presentation" class="active"><a href="#logininformation" aria-controls="logininformation" role="tab" data-toggle="tab"><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('sugarcrm/module','Login information');?></a></li>
